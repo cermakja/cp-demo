@@ -15,7 +15,6 @@
 **/*.p12
 **/keypair/
 ui/expanded
-*.zip
 *.log
 **/delta_configs/
 **/stack-configs/
