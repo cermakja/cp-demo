@@ -85,4 +85,5 @@ RUN rm -f /usr/share/confluent-hub-components/confluentinc-csid-secrets-provider
 /usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/protobuf-java-3.21.12.jar \
 /usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/protobuf-java-util-3.21.12.jar \
 /usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/re2j-1.6.jar \
-/usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/threetenbp-1.6.8.jar
+/usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/threetenbp-1.6.8.jar \
+/usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/grpc-googleapis-1.54.0.jar
