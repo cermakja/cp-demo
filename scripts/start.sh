@@ -84,9 +84,9 @@ docker-compose exec kafka1 kafka-configs \
 
 #-------------------------------------------------------------------------------
 
-
 # Bring up more containers
-docker-compose up --no-recreate -d schemaregistry connect control-center
+docker-compose up --no-recreate -d schemaregistry connect
+#docker-compose up --no-recreate -d schemaregistry connect control-center
 
 echo
 echo -e "Create topics in Kafka cluster:"
@@ -129,32 +129,32 @@ echo
 
 #-------------------------------------------------------------------------------
 
-# Start more containers
-docker-compose up --no-recreate -d ksqldb-server ksqldb-cli restproxy
-
-# Verify ksqlDB server has started
-echo
-echo
-MAX_WAIT=120
-echo -e "\nWaiting up to $MAX_WAIT seconds for ksqlDB server to start"
-retry $MAX_WAIT host_check_up ksqldb-server || exit 1
-
-echo -e "\nRun ksqlDB queries:"
-${DIR}/ksqlDB/run_ksqlDB.sh
-
-if [[ "$VIZ" == "true" ]]; then
-  build_viz || exit 1
-fi
-
-echo -e "\nStart additional consumers to read from topics WIKIPEDIANOBOT, WIKIPEDIA_COUNT_GT_1"
-${DIR}/consumers/listen_WIKIPEDIANOBOT.sh
-${DIR}/consumers/listen_WIKIPEDIA_COUNT_GT_1.sh
-
-echo
-echo
-echo "Start the Kafka Streams application wikipedia-activity-monitor"
-docker-compose up --no-recreate -d streams-demo
-echo "..."
+## Start more containers
+#docker-compose up --no-recreate -d ksqldb-server ksqldb-cli restproxy
+#
+## Verify ksqlDB server has started
+#echo
+#echo
+#MAX_WAIT=120
+#echo -e "\nWaiting up to $MAX_WAIT seconds for ksqlDB server to start"
+#retry $MAX_WAIT host_check_up ksqldb-server || exit 1
+#
+#echo -e "\nRun ksqlDB queries:"
+#${DIR}/ksqlDB/run_ksqlDB.sh
+#
+#if [[ "$VIZ" == "true" ]]; then
+#  build_viz || exit 1
+#fi
+#
+#echo -e "\nStart additional consumers to read from topics WIKIPEDIANOBOT, WIKIPEDIA_COUNT_GT_1"
+#${DIR}/consumers/listen_WIKIPEDIANOBOT.sh
+#${DIR}/consumers/listen_WIKIPEDIA_COUNT_GT_1.sh
+#
+#echo
+#echo
+#echo "Start the Kafka Streams application wikipedia-activity-monitor"
+#docker-compose up --no-recreate -d streams-demo
+#echo "..."
 
 
 #-------------------------------------------------------------------------------
@@ -192,13 +192,13 @@ DONE! From your browser:
 
 EOF
 
-if [[ "$VIZ" == "true" ]]; then
-cat << EOF
-  Kibana
-     $kibanaURL
-
-EOF
-fi
+#if [[ "$VIZ" == "true" ]]; then
+#cat << EOF
+#  Kibana
+#     $kibanaURL
+#
+#EOF
+#fi
 
 cat << EOF
 Want more? Learn how to replicate data from the on-prem cluster to Confluent Cloud:

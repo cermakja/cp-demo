@@ -2,13 +2,13 @@
 # Environment variables can be sourced in a variety of ways.  One of those ways is through
 # a well known '.env' file located in the same folder as the docker-compose.yml file.  See the Docker
 # documentation for details: https://docs.docker.com/compose/environment-variables/#the-env-file
-# 
+#
 # This feature is being used to parameterize some values within this file.  In this directory is also
 # a .env file, which is actually a symbolic link to <examples-root>/utils/config.env.  That file
 # contains values which get substituted here when docker-compose parses this file.
 #
 # If you'd like to view the docker-compose.yml file rendered with its environment variable substitutions
-# you can execute the `docker-compose config` command.  Take note that some demos provide additional 
+# you can execute the `docker-compose config` command.  Take note that some demos provide additional
 # environment variable values by exporting them in a script prior to running `docker-compose up`.
 ---
 services:
@@ -121,7 +121,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,TOKEN:SASL_SSL,SSL:SSL,CLEAR:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9091,TOKEN://kafka1:10091,SSL://kafka1:11091,CLEAR://kafka1:12091
-      
+
       KAFKA_SUPER_USERS: User:admin;User:mds;User:superUser;User:ANONYMOUS
       KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
@@ -315,7 +315,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,TOKEN:SASL_SSL,SSL:SSL,CLEAR:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9092,TOKEN://kafka2:10092,SSL://kafka2:11092,CLEAR://kafka2:12092
-      
+
       KAFKA_SUPER_USERS: User:admin;User:mds;User:superUser;User:ANONYMOUS
       KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
       KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
@@ -454,7 +454,21 @@ services:
       KAFKA_PASSWORD_ENCODER_SECRET: encoder-secret
 
 
-        
+# to run the docker composer, you need to copy "gcp-key.json" file under "scripts/security" directory.
+# $ cp <your-google-service-account-key.json ./scripts/security/gcp-key.json
+# then you can run
+# ./scripts/start.sh
+
+# to build the image, run:
+# $ source env.sh
+# $ docker build --build-arg CP_VERSION=${CONFLUENT_DOCKER_TAG} --build-arg REPOSITORY=$REPOSITORY -t localbuild/connect:${CONFLUENT_DOCKER_TAG}-${CONNECTOR_VERSION}  .
+#
+# to stop the connect only run:
+# $ docker-compose rm -sf connect
+#
+# to start/recreate the connect only run:
+# $ docker-compose up --no-recreate connect -d
+#
   connect:
     image: localbuild/connect:${CONFLUENT_DOCKER_TAG}-${CONNECTOR_VERSION}
     container_name: connect
@@ -470,6 +484,8 @@ services:
       schemaregistry:
         condition: service_healthy
     volumes:
+      # make sure you have gcp-key.json file
+      # ./scripts/security/gcp-key.json
       - ./scripts/security:/etc/kafka/secrets
       - ./scripts/security/keypair:/tmp/conf
     ports:
@@ -497,8 +513,10 @@ services:
 
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
-      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+#      CONNECT_LOG4J_OPTS: "-Dlog4j.configuration=file:/logs/log4j.properties"
+#      CONNECT_LOG4J_ROOT_LOGLEVEL: DEBUG
+##      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect=DEBUG,log4j.root.loglevel=DEBUG"
+#      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
       CLASSPATH: "/usr/share/java/monitoring-interceptors/*"
 
       # Connect Worker
@@ -594,8 +612,26 @@ services:
       CONNECT_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: 'connectAdmin:connectAdmin'
       CONNECT_CONFLUENT_METADATA_HTTP_AUTH_CREDENTIALS_PROVIDER: 'BASIC'
 
+      # logger
+      CONNECT_LOG4J_ROOT_LOGLEVEL: DEBUG
+      #      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect=DEBUG,log4j.root.loglevel=DEBUG"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+
+      # license
+#      confluent.license: "license-key-file-text-here"
+
       # Secret Registry
-      CONNECT_CONFIG_PROVIDERS: 'secret'
+      CONNECT_CONFIG_PROVIDERS: 'file,secret,gsecret'
+#      CONNECT_CONFIG_PROVIDERS: 'file,secret'
+
+
+      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
+
+      CONNECT_CONFIG_PROVIDERS_GSECRET_CLASS: io.confluent.csid.config.provider.gcloud.SecretManagerConfigProvider
+      CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_PROJECT_ID: 441220004633
+      CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_CREDENTIAL_LOCATION: File
+      CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_CREDENTIAL_FILE: /etc/kafka/secrets/gcp-key.json
+
       CONNECT_CONFIG_PROVIDERS_SECRET_CLASS: 'io.confluent.connect.secretregistry.rbac.config.provider.InternalSecretConfigProvider'
       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_MASTER_ENCRYPTION_KEY: 'password1234'
       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_BOOTSTRAP_SERVERS: kafka1:10091,kafka2:10092
@@ -685,7 +721,7 @@ services:
       # If using Confluent Health+ for monitoring and alerting, uncomment the line below to run in management mode.
       # CONTROL_CENTER_MODE_ENABLE: "management"
       # You can now remove all Control Center "STREAMS", "MONITORING", and "METRICS" configurations
-      
+
       # general settings
       CONTROL_CENTER_BOOTSTRAP_SERVERS: SASL_SSL://kafka1:10091,SASL_SSL://kafka2:10092
       CONTROL_CENTER_REPLICATION_FACTOR: 2
@@ -718,7 +754,7 @@ services:
       CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: confluent
       CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: confluent
 
-      # HTTP and HTTPS to Control Center UI 
+      # HTTP and HTTPS to Control Center UI
       CONTROL_CENTER_REST_LISTENERS: http://0.0.0.0:9021,https://0.0.0.0:9022
       CONTROL_CENTER_REST_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.controlCenterAndKsqlDBServer.truststore.jks
       CONTROL_CENTER_REST_SSL_TRUSTSTORE_PASSWORD: confluent
@@ -747,7 +783,7 @@ services:
       # RBAC
       CONTROL_CENTER_REST_AUTHENTICATION_METHOD: BEARER
       PUBLIC_KEY_PATH: /tmp/conf/public.pem
-      
+
       # Used by Control Center to connect to MDS to verify tokens and authenticate clients
       CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: https://kafka1:8091,https://kafka2:8092
       CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: controlcenterAdmin:controlcenterAdmin
@@ -872,7 +908,7 @@ services:
       KSQL_HOST_NAME: ksqldb-server
       KSQL_LISTENERS: "http://0.0.0.0:8088,https://0.0.0.0:8089"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-      
+
       KSQL_KSQL_SECURITY_EXTENSION_CLASS: io.confluent.ksql.security.KsqlConfluentSecurityExtension
 
       # Enable bearer token authentication which allows the identity of the ksqlDB end user to be propagated to Kafka for authorization
@@ -891,7 +927,7 @@ services:
       KSQL_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.controlCenterAndKsqlDBServer.keystore.jks
       KSQL_SSL_KEYSTORE_PASSWORD: confluent
       KSQL_SSL_KEY_PASSWORD: confluent
-      # Before v6.1.0: disabling TLSv1.x is required 
+      # Before v6.1.0: disabling TLSv1.x is required
       KSQL_SSL_ENABLED_PROTOCOLS: "TLSv1.3,TLSv1.2"
       KSQL_SSL_CIPHER_SUITES: "TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
 
@@ -915,7 +951,7 @@ services:
 
       # Confluent Monitoring Interceptors for Control Center streams monitoring
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"    
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       KSQL_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.controlCenterAndKsqlDBServer.truststore.jks
       KSQL_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_PASSWORD: confluent
       KSQL_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.controlCenterAndKsqlDBServer.keystore.jks
@@ -979,7 +1015,7 @@ services:
 
       # Credentials and classpath for cub kafka-ready
       CUB_CLASSPATH: '/usr/share/java/confluent-security/kafka-rest/*:/usr/share/java/kafka-rest/*:/usr/share/java/cp-base-new/*'
-      
+
       # Enable OAuth for REST Proxy's embedded Kafka client that accesses and manages consumer groups and topics
       KAFKA_REST_CLIENT_SECURITY_PROTOCOL: SASL_SSL
       KAFKA_REST_CLIENT_SASL_MECHANISM: OAUTHBEARER
@@ -1018,4 +1054,4 @@ services:
       - ./env_files/streams-demo.env
     environment:
       KAFKA_REPLICATION_FACTOR: 2
-  
+
