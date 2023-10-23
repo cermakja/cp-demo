@@ -19,7 +19,7 @@ ARG CP_VERSION
 # Stage 1 -- install connectors
 FROM $REPOSITORY/cp-server-connect:$CP_VERSION AS install-connectors
 
-ENV CONNECT_PLUGIN_PATH: "/usr/share/confluent-hub-components,/usr/share/java"
+ENV CONNECT_PLUGIN_PATH: "/usr/share/confluent-hub-components,/usr/share/java,/usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud"
 
 # Install SSE connector
 RUN confluent-hub install --no-prompt cjmatta/kafka-connect-sse:1.0
