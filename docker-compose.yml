@@ -491,7 +491,7 @@ services:
     ports:
       - 8083:8083
     environment:
-      CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
+      CUB_CLASSPATH: '/usr/share/confluent-hub-components/confluentinc-csid-secrets-provider-gcloud/lib/*:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
 
       CONNECT_BOOTSTRAP_SERVERS: kafka1:10091,kafka2:10092
       CONNECT_LISTENERS: https://0.0.0.0:8083
@@ -512,7 +512,7 @@ services:
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
 
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_PLUGIN_PATH: "/usr/share/confluent-hub-components,/usr/share/java"
 #      CONNECT_LOG4J_OPTS: "-Dlog4j.configuration=file:/logs/log4j.properties"
 #      CONNECT_LOG4J_ROOT_LOGLEVEL: DEBUG
 ##      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect=DEBUG,log4j.root.loglevel=DEBUG"
@@ -627,8 +627,7 @@ services:
 
       CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
 
-      #CONNECT_CONFIG_PROVIDERS_GSECRET_CLASS: io.confluent.csid.config.provider.gcloud.SecretManagerConfigProvider
-      CONNECT_CONFIG_PROVIDERS_GSECRET_CLASS: org.apache.kafka.common.config.provider.ConfigProvider
+      CONNECT_CONFIG_PROVIDERS_GSECRET_CLASS: io.confluent.csid.config.provider.gcloud.SecretManagerConfigProvider
       CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_PROJECT_ID: 441220004633
       CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_CREDENTIAL_LOCATION: File
       CONNECT_CONFIG_PROVIDERS_GSECRET_PARAM_CREDENTIAL_FILE: /etc/kafka/secrets/gcp-key.json

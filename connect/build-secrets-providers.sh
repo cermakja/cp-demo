@@ -29,8 +29,8 @@ docker run -i --rm \
  confluentinc/cp-server-connect:$CP_VERSION sh -s <<-'EOF'
 # within docker
 cd /code
-./mvnw package -DskipTests
-
+#./mvnw package -DskipTests
+./mvnw clean package
 EOF
 
 # copy the package to lib directory. make sure you delete the old version in lib
